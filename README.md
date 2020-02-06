@@ -30,5 +30,7 @@ Finally your download will start and stop once everything have been downloaded.
 ## To Do
 
 - Allow to download all videos from a specific channel.
+- Allow users to select both audio and video quality.
 - Create a progress bar.
 - Develop tests.
+

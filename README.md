@@ -13,19 +13,19 @@ Execute ```python YouTubeDownloader.py```
 
 Destination path to save the downloaded files will be asked.
 
-![Destination folder](https://github.com/Jodagito/YouTubeDownloader/tree/master/res/1.gif "Destination folder")
+![Destination folder](res/1.gif "Destination folder")
 
 You will be asked to select what are you going to download, either a song, a video or an entire playlist.
 
-![What are you going to download?](https://github.com/Jodagito/YouTubeDownloader/tree/master/res/2.gif "What are you going to download?")
+![What are you going to download?](res/2.gif "What are you going to download?")
 
 An object URL must be inserted, if you chosed to download a playlist then you'll be asked to select what to download, wether only audios or full videos.
 
-![File URL](https://github.com/Jodagito/YouTubeDownloader/tree/master/res/3.gif "File URL")
+![File URL](res/3.gif "File URL")
 
 Finally your download will start and stop once everything have been downloaded.
 
-![Download start](https://github.com/Jodagito/YouTubeDownloader/tree/master/res/4.gif "Download start")
+![Download start](res/4.gif "Download start")
 
 ## To Do
 

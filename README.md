@@ -6,6 +6,7 @@ Execute ```git clone https://github.com/Jodagito/YoutubeDownloader``` on the des
 
 ## Requirements
     pytube3==9.5.13
+    requests==2.22.0
 
 ## Usage
 

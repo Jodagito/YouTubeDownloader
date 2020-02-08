@@ -6,6 +6,7 @@ Execute ```git clone https://github.com/Jodagito/YoutubeDownloader``` on the des
 
 ## Requirements
     pytube3==9.5.13
+    requests==2.22.0
 
 ## Usage
 
@@ -31,6 +32,10 @@ Finally your download will start and stop once everything have been downloaded.
 
 - Allow to download all videos from a specific channel.
 - Allow users to select both audio and video quality.
+- Allow users to pass an URL on file call.
+- Automate playlists detection.
+- Clean code.
 - Create a progress bar.
 - Develop tests.
+- Validations.
 

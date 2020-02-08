@@ -1,1 +1,2 @@
 pytube3==9.5.13
+requests==2.22.0

@@ -1,27 +1,39 @@
 import inspect
 import json
 import os
-import requests
 from pytube import YouTube, Playlist
 from pytube.exceptions import RegexMatchError
 
-destination_path = input("\nInsert the destination path ")
-preferences = ""
+
+CONFIGURATIONS = {'destination_path': '', 'video_quality': '',
+                  'audio_quality': '', 'when_unavailable': ''}
 CONFIGS_FILE = 'configs.json'
+if not CONFIGURATIONS['destination_path']:
+    destination_path = input("\nInsert the destination path ")
+destination_path = CONFIGURATIONS['destination_path']
 
 
 def create_config_file():
-    with open(CONFIGS_FILE, w) as config_file:
+    with open(CONFIGS_FILE, 'w') as config_file:
         config_data = {'Destination path': '', 'Video quality': '',
                        'Audio quality': '', 'When unavailable': 'Highest'}
         json.dump(config_data, config_file)
+
+
+def load_config_file():
+    with open(CONFIGS_FILE) as config_file:
+        config_data = json.loads(config_file)
+        CONFIGURATIONS['destination_path'] = config_data['Destination path']
+        CONFIGURATIONS['video_quality'] = config_data['Video quality']
+        CONFIGURATIONS['audio_quality'] = config_data['Audio quality']
+        CONFIGURATIONS['when_unavailable'] = config_data['When unavailable']
 
 
 def main():
     clear_terminal()
     print("\t\tYouTube Downloader\n\n")
     menu_option = input(
-        "Select and option to continue\n\n\t1) Start Downloading\n\t2) Settings\n\t3) Help\n\t4) Exit").lower()
+        "Select and option to continue\n\n\t1) Start Downloading\n\t2) Settings\n\t3) Help\n\t4) Exit\n").lower()
     if menu_option in ['1', '1)', 'start downloading']:
         downloads_menu()
     elif menu_option in ['2', '2)', 'settings']:
@@ -81,8 +93,19 @@ def validate_playlist(url):
         return True
     except KeyError:
         return False
+
+
 def download_audio(url):
-    return
+    if not CONFIGURATIONS['audio_quality']:
+        if CONFIGURATIONS['when_unavailable'] == "Highest":
+            yt_object.streams.get_audio_only().download(destination_path)
+        else:
+            filtered_yt_object = yt_object.streams.filter(type=file_format).order_by(
+                'resolution').desc().all()
+            available_streams = get_available_streams(
+                filtered_yt_object, file_format)
+            selection = resolution_selection(available_streams)
+            filtered_yt_object[selection].download(destination_path)
 
 
 def download_video(url):
@@ -164,7 +187,7 @@ def set_default_destination_path():
         "\n\nInsert the default destination path ")
     if (os.path.exists(default_destination_path) or
             os.access(os.path.dirname(default_destination_path), os.W_OK)):
-        with open(CONFIGS_FILE, w) as config_file:
+        with open(CONFIGS_FILE, 'w') as config_file:
             json.dump(
                 {'Destination path': default_destination_path}, config_file)
     elif default_destination_path == "":
@@ -184,13 +207,13 @@ def set_default_qualities():
         "\n\Select the default audio quality \n1) 160kbps\n2) 128kbps\n3) 70kbps\n4) 50kbps\n")
     if default_video_quality in ["1", "2", "3", "4", "5"]:
         default_video_quality = video_qualities[int(default_video_quality) - 1]
-        with open(CONFIGS_FILE, w) as config_file:
+        with open(CONFIGS_FILE, 'w') as config_file:
             json.dump(
                 {'Video quality': default_video_quality}, config_file)
     if default_audio_quality in ["1", "2", "3", "4", "5"]:
         default_audio_quality = audio_qualities[int(
             default_audio_quality) - 1]
-        with open(CONFIGS_FILE, w) as config_file:
+        with open(CONFIGS_FILE, 'w') as config_file:
             json.dump(
                 {'Audio quality': default_audio_quality}, config_file)
     elif default_video_quality == "" and default_audio_quality == "":
@@ -208,7 +231,7 @@ def set_default_when_unavailable():
         f"\n\nSet lowest quality as default if" +
         " default one is unavailable\n\n\tYes\n\tNo\n").lower()
     if change_default in ["yes", "y"]:
-        with open(CONFIGS_FILE, w) as config_file:
+        with open(CONFIGS_FILE, 'w') as config_file:
             json.dump(
                 {'When unavailable': "Lowest"}, config_file)
     elif change_default in ["no", "n"]:
@@ -222,7 +245,7 @@ def help_menu():
 
 
 def invalid_input_exception():
-    input("\n\nError: Invalid input.\n")
+    input("\n\nError: Invalid input.\nPress enter to continue...")
     clear_terminal()
     locals()[inspect.stack()[1][3]]()
 
@@ -234,4 +257,5 @@ def clear_terminal():
 if __name__ == '__main__':
     if not os.path.exists(CONFIGS_FILE):
         create_config_file()
+    load_config_file()
     main()

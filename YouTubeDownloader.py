@@ -17,21 +17,24 @@ def create_config_file():
 
 
 def main():
-    preferences = set_preferences()
     clear_terminal()
-    download_option = input("""What are you going to download?
-                            \n\t1) Song\n\t2) Video\n\t3) Playlist\n""")
-    if download_option in ['1', '1)', 'Song']:
-        download_file()
-    elif download_option in ['2', '2)', 'Video']:
-        download_file(file_format="video")
-    elif download_option in ['3', '3)', 'Playlist']:
-        download_playlists()
+    print("\t\tYouTube Downloader\n\n")
+    menu_option = input(
+        "Select and option to continue\n\n\t1) Start Downloading\n\t2) Settings\n\t3) Help\n\t4) Exit").lower()
+    if menu_option in ['1', '1)', 'start downloading']:
+        downloads_menu()
+    elif menu_option in ['2', '2)', 'settings']:
+        settings_menu()
+    elif menu_option in ['3', '3)', 'help']:
+        help_menu()
+    elif menu_option in ['4', '4)', 'exit']:
+        clear_terminal()
+        input("YouTube Downloader has been closed.")
     else:
         invalid_input_exception()
 
 
-def download_playlists():
+def downloads_menu():
     file_format = "audio"
     playlist_url = input("\nInsert the playlist URL ")
     playlist_videos = get_playlist_videos(playlist_url)
@@ -89,7 +92,7 @@ def download_file(file_url=None, file_format="audio"):
         print(error)
 
 
-def set_preferences():
+def settings_menu():
     clear_terminal()
     selected_option = input(
         f"\t\tConfiguration Menu\n\tSelect an option to continue" +
@@ -163,8 +166,8 @@ def set_default_when_unavailable():
         invalid_input_exception()
 
 
-def get_available_streams(yt_object, file_format):
-    available_streams = ["File size: " + str(stream.filesize) +
+def help_menu():
+    return
                          " | File resolution: " +
                          stream.resolution +
                          " | File extension: " +

@@ -2,7 +2,8 @@ import inspect
 import json
 import os
 import requests
-from pytube import YouTube
+from pytube import YouTube, Playlist
+from pytube.exceptions import RegexMatchError
 
 destination_path = input("\nInsert the destination path ")
 preferences = ""
@@ -35,29 +36,58 @@ def main():
 
 
 def downloads_menu():
-    file_format = "audio"
-    playlist_url = input("\nInsert the playlist URL ")
-    playlist_videos = get_playlist_videos(playlist_url)
-    option = input(
-        "\nSelect what you want to download\n\n\t1) Audios\n\t2) Videos\n")
-    if option in ['1', '1)', 'Audios']:
+    clear_terminal()
+    print("\t\tDownloads Menu\n\n")
+    download_source_url = input("Input the download source url ")
+    try:
+        pytube_object = pytube.Playlist(download_source_url)
+        playlist_videos = pytube_object.video_urls
+    except KeyError:
         pass
-    elif option in ['2', '2)', 'Videos']:
-        file_format = "video"
+    format_selection = input(
+        "\n\nSelect a download option\n\t1) Audio only\n\t2) Video and audio\n")
+    if format_selection in ['1', '1)']:
+        for url in playlist_videos:
+            download_audio(url)
+        else:
+            download_audio(download_source_url)
+    elif format_selection in ['2', '2)']:
+        for url in playlist_videos:
+            download_video(url)
+        else:
+            download_video(download_source_url)
     else:
         invalid_input_exception()
-    for file_url in playlist_videos:
-        download_file(file_url, file_format)
-    print("The playlist has been downloaded succesfully.\n")
 
 
-def get_playlist_videos(url):
-    playlist_web = requests.get(url).content
-    website_data = str(playlist_web).split(' ')
-    item = 'href="/watch?'
-    playlist_videos = [link.replace('href="', 'https://youtube.com').split(';')[0]
-                       for link in website_data if item in link]
-    return playlist_videos
+def download_audio(url):
+    return
+
+
+def download_video(url):
+    return
+
+
+def get_available_streams(yt_object, file_format):
+    available_streams = ["File size: " + str(stream.filesize) +
+                         " | File resolution: " +
+                         stream.resolution +
+                         " | File extension: " +
+                         stream.mime_type for stream in
+                         yt_object]
+    return available_streams
+
+
+def resolution_selection(available_streams):
+    position = 1
+    for stream in available_streams:
+        print(f"{position} {stream}")
+        position += 1
+    selection = input("\n\nWhich resolution would you like for your file? ")
+    if selection == "" or int(selection) not in range(len(available_streams)):
+        invalid_input_exception()
+    selection = int(selection) - 1
+    return selection
 
 
 def download_file(file_url=None, file_format="audio"):
@@ -117,7 +147,7 @@ def set_default_destination_path():
             json.dump(
                 {'Destination path': default_destination_path}, config_file)
     elif default_destination_path == "":
-        set_preferences()
+        settings_menu()
     else:
         invalid_input_exception()
 
@@ -143,7 +173,7 @@ def set_default_qualities():
             json.dump(
                 {'Audio quality': default_audio_quality}, config_file)
     elif default_video_quality == "" and default_audio_quality == "":
-        set_preferences()
+        settings_menu()
     else:
         invalid_input_exception()
     set_default_when_unavailable()
@@ -168,24 +198,6 @@ def set_default_when_unavailable():
 
 def help_menu():
     return
-                         " | File resolution: " +
-                         stream.resolution +
-                         " | File extension: " +
-                         stream.mime_type for stream in
-                         yt_object]
-    return available_streams
-
-
-def resolution_selection(available_streams):
-    position = 1
-    for stream in available_streams:
-        print(f"{position} {stream}")
-        position += 1
-    selection = input("\n\nWhich resolution would you like for your file? ")
-    if selection == "" or int(selection) not in range(len(available_streams)):
-        invalid_input_exception()
-    selection = int(selection) - 1
-    return selection
 
 
 def invalid_input_exception():

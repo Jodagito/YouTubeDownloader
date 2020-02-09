@@ -44,7 +44,7 @@ def main():
         clear_terminal()
         input("YouTube Downloader has been closed.")
     else:
-        invalid_input_exception()
+        handle_incorrect_selection()
 
 
 def downloads_menu():
@@ -57,23 +57,23 @@ def downloads_menu():
     format_selection = input(
         "\n\nSelect a download option\n\t1) Audio only\n\t2) Video and audio\n")
     if format_selection in ['1', '1)']:
-        for url in playlist_videos:
-            download_audio(url)
+        for element in playlist_videos:
+            download_audio(element)
         else:
-            download_audio(download_source_url)
+            download_audio(pytube_object)
     elif format_selection in ['2', '2)']:
-        for url in playlist_videos:
-            download_video(url)
+        for element in playlist_videos:
+            download_video(element)
         else:
-            download_video(download_source_url)
+            download_video(pytube_object)
     else:
-        invalid_input_exception()
+        handle_incorrect_selection()
 
 
 def look_for_playlist(pytube_object):
     if validate_playlist(pytube_object.watch_url):
         pytube_object = Playlist(pytube_object.watch_url)
-        return pytube_object.video_urls
+        return pytube_object.videos
     return []
 
 
@@ -81,8 +81,8 @@ def validate_youtube_url(url):
     try:
         YouTube(url)
         return
-    except RegexMatchError:
-        input("""Error: An invalid URL has been inserted.
+    except RegexMatchError as e:
+        input("""Error: An invalid URL has been inserted.\n{e}\n
               \nPress enter to continue...""")
         main()
 
@@ -95,75 +95,56 @@ def validate_playlist(url):
         return False
 
 
-def download_audio(url):
-    if not CONFIGURATIONS['audio_quality']:
-        if CONFIGURATIONS['when_unavailable'] == "Highest":
-            yt_object.streams.get_audio_only().download(destination_path)
-        else:
-            filtered_yt_object = yt_object.streams.filter(type=file_format).order_by(
-                'resolution').desc().all()
-            available_streams = get_available_streams(
-                filtered_yt_object, file_format)
-            selection = resolution_selection(available_streams)
-            filtered_yt_object[selection].download(destination_path)
-
-
-def download_video(url):
-    return
-
-
-def get_available_streams(yt_object, file_format):
-    available_streams = ["File size: " + str(stream.filesize) +
-                         " | File resolution: " +
-                         stream.resolution +
-                         " | File extension: " +
-                         stream.mime_type for stream in
-                         yt_object]
-    return available_streams
-
-
-def resolution_selection(available_streams):
-    position = 1
-    for stream in available_streams:
-        print(f"{position} {stream}")
-        position += 1
-    selection = input("\n\nWhich resolution would you like for your file? ")
-    if selection == "" or int(selection) not in range(len(available_streams)):
-        invalid_input_exception()
-    selection = int(selection) - 1
-    return selection
-
-
-def download_file(file_url=None, file_format="audio"):
-    if not file_url:
-        file_url = input(f"\nInsert the URL ")
-    yt_object = YouTube(file_url)
+def download_audio(pytube_object):
     try:
-        print(f"Downloading {YouTube(file_url).title}")
-        if file_format == "audio":
-            if preferences == "Default":
-                yt_object.streams.get_audio_only().download(destination_path)
-            else:
-                filtered_yt_object = yt_object.streams.filter(type=file_format).order_by(
-                    'resolution').desc().all()
-                available_streams = get_available_streams(
-                    filtered_yt_object, file_format)
-                selection = resolution_selection(available_streams)
-                filtered_yt_object[selection].download(destination_path)
-        elif file_format == "video":
-            if preferences == "Default":
-                yt_object.streams.get_highest_resolution().download(destination_path)
-            else:
-                filtered_yt_object = yt_object.streams.filter(type=file_format).order_by(
-                    'abr').desc().all()
-                available_streams = get_available_streams(
-                    filtered_yt_object, file_format)
-                selection = resolution_selection(available_streams)
-                filtered_yt_object[selection].download(destination_path)
-        print(f"{yt_object.title} has been downloaded succesfully.\n")
-    except Exception as error:
-        print(f"{yt_object.title} couldn't be downloaded.\n")
-        print(error)
+        if not CONFIGURATIONS['audio_quality']:
+            unavailable_audio(pytube_object)
+        else:
+            default_quality = CONFIGURATIONS['audio_quality'] + 'kbps'
+            filtered_pytube_object = pytube_object.streams.filter(
+                type='audio', abr=default_quality).order_by('abr').desc().all()[0]
+            if not filtered_pytube_object:
+                print(
+                    f"\n\nDefault quality isn't available. {CONFIGURATIONS['when_unavailable']} quality will be downloaded.")
+                return unavailable_audio(pytube_object)
+            filtered_pytube_object.download(destination_path)
+    except (IOError, OSError, PytubeError) as e:
+        print(f"{pytube_object.title} couldn't be downloaded.\n{e}\n")
+
+
+def unavailable_audio(pytube_object):
+    if CONFIGURATIONS['when_unavailable'] == "Highest":
+        pytube_object.streams.filter(type='audio').order_by(
+            'abr').desc().all()[0].download(destination_path)
+    else:
+        pytube_object.streams.filter(type='audio').order_by(
+            'abr').all()[0].download(destination_path)
+
+
+def download_video(pytube_object):
+    try:
+        if not CONFIGURATIONS['video_quality']:
+            unavailable_video(pytube_object)
+        else:
+            default_quality = CONFIGURATIONS['video_quality'] + 'p'
+            filtered_pytube_object = pytube_object.streams.filter(
+                type='video', res=default_quality).order_by('resolution').desc().all()[0]
+            if not filtered_pytube_object:
+                print(
+                    f"\n\nDefault quality isn't available. {CONFIGURATIONS['when_unavailable']} quality will be downloaded.")
+                return unavailable_video(pytube_object)
+            filtered_pytube_object.download(destination_path)
+    except (IOError, OSError, PytubeError) as e:
+        print(f"{pytube_object.title} couldn't be downloaded.\n{e}\n")
+
+
+def unavailable_video(pytube_object):
+    if CONFIGURATIONS['when_unavailable'] == "Highest":
+        pytube_object.streams.filter(type='audio').order_by(
+            'abr').desc().all()[0].download(destination_path)
+    else:
+        pytube_object.streams.filter(type='audio').order_by(
+            'abr').all()[0].download(destination_path)
 
 
 def settings_menu():
@@ -177,7 +158,7 @@ def settings_menu():
     elif selected_option in ["2", "setdefaultqualities"]:
         set_default_qualities()
     else:
-        invalid_input_exception()
+        handle_incorrect_selection()
 
 
 def set_default_destination_path():
@@ -193,7 +174,7 @@ def set_default_destination_path():
     elif default_destination_path == "":
         settings_menu()
     else:
-        invalid_input_exception()
+        handle_incorrect_selection()
 
 
 def set_default_qualities():
@@ -219,7 +200,7 @@ def set_default_qualities():
     elif default_video_quality == "" and default_audio_quality == "":
         settings_menu()
     else:
-        invalid_input_exception()
+        handle_incorrect_selection()
     set_default_when_unavailable()
 
 
@@ -237,15 +218,15 @@ def set_default_when_unavailable():
     elif change_default in ["no", "n"]:
         return
     else:
-        invalid_input_exception()
+        handle_incorrect_selection()
 
 
 def help_menu():
     return
 
 
-def invalid_input_exception():
-    input("\n\nError: Invalid input.\nPress enter to continue...")
+def handle_incorrect_selection():
+    input("\n\nError: Incorrect selection.\nPress enter to continue...")
     clear_terminal()
     locals()[inspect.stack()[1][3]]()
 

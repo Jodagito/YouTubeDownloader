@@ -39,11 +39,9 @@ def downloads_menu():
     clear_terminal()
     print("\t\tDownloads Menu\n\n")
     download_source_url = input("Input the download source url ")
-    try:
-        pytube_object = pytube.Playlist(download_source_url)
-        playlist_videos = pytube_object.video_urls
-    except KeyError:
-        pass
+    validate_youtube_url(download_source_url)
+    pytube_object = YouTube(download_source_url)
+    playlist_videos = look_for_playlist(pytube_object)
     format_selection = input(
         "\n\nSelect a download option\n\t1) Audio only\n\t2) Video and audio\n")
     if format_selection in ['1', '1)']:
@@ -60,6 +58,29 @@ def downloads_menu():
         invalid_input_exception()
 
 
+def look_for_playlist(pytube_object):
+    if validate_playlist(pytube_object.watch_url):
+        pytube_object = Playlist(pytube_object.watch_url)
+        return pytube_object.video_urls
+    return []
+
+
+def validate_youtube_url(url):
+    try:
+        YouTube(url)
+        return
+    except RegexMatchError:
+        input("""Error: An invalid URL has been inserted.
+              \nPress enter to continue...""")
+        main()
+
+
+def validate_playlist(url):
+    try:
+        Playlist(download_source_url)
+        return True
+    except KeyError:
+        return False
 def download_audio(url):
     return
 

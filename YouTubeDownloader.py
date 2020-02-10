@@ -157,11 +157,11 @@ def download_video(pytube_object):
 
 def unavailable_video(pytube_object):
     if CONFIGURATIONS['when_unavailable'] == "Highest":
-        pytube_object.streams.filter(type='audio').order_by(
-            'abr').desc().all()[0].download(destination_path)
+        pytube_object.streams.filter(type='video').order_by(
+            'resolution').desc().all()[0].download(destination_path)
     else:
-        pytube_object.streams.filter(type='audio').order_by(
-            'abr').all()[0].download(destination_path)
+        pytube_object.streams.filter(type='video').order_by(
+            'resolution').all()[0].download(destination_path)
     print(f"\n{pytube_object.title} downloaded succesfully.")
 
 

@@ -75,7 +75,9 @@ def downloads_menu():
         else:
             download_video(pytube_object)
     else:
-        handle_incorrect_selection()
+        return handle_invalid_input()
+    input("\nPress enter to continue...")
+    return main()
 
 
 def look_for_playlist(pytube_object):
@@ -252,7 +254,9 @@ def set_default_when_unavailable():
     elif change_default in ["no", "n"]:
         return
     else:
-        handle_incorrect_selection()
+        return handle_invalid_input()
+
+
 def list_settings():
     clear_terminal()
     with open(CONFIGS_FILE, 'r+') as config_file:
@@ -267,10 +271,10 @@ def help_menu():
     return
 
 
-def handle_incorrect_selection():
-    input("\n\nError: Incorrect selection.\nPress enter to continue...")
+def handle_invalid_input():
+    input("\n\nError: Invalid input.\nPress enter to continue...")
     clear_terminal()
-    locals()[inspect.stack()[1][3]]()
+    return globals()[inspect.stack()[1][3]]()
 
 
 def clear_terminal():

@@ -268,7 +268,14 @@ def list_settings():
 
 
 def help_menu():
-    return
+    clear_terminal()
+    input("Sorry, this menu is being developed\nPress enter to continue...")
+    return main()
+
+
+def exit():
+    clear_terminal()
+    input("YouTube Downloader has been closed.")
 
 
 def handle_invalid_input():

@@ -168,7 +168,7 @@ def unavailable_video(pytube_object):
 def settings_menu():
     clear_terminal()
     selected_option = input(
-        f"\t\tConfiguration Menu\n\tSelect an option to continue" +
+        f"\tSettings Menu\n\nSelect an option to continue" +
         "\n\n\t1) List actual settings" +
         "\n\t2) Set destination path\n\t3) Set qualities\n\t4) Go back\n").lower().replace(" ", "")
     if selected_option in ["1", "listactualsettings"]:
@@ -275,7 +275,7 @@ def help_menu():
 
 def exit():
     clear_terminal()
-    input("YouTube Downloader has been closed.")
+    print("YouTube Downloader has been closed.")
 
 
 def handle_invalid_input():
@@ -291,7 +291,9 @@ def clear_terminal():
 if __name__ == '__main__':
     try:
         if not CONFIGURATIONS['destination_path']:
-            destination_path = input("\nInsert the destination_path ")
+            print("A default path can be setted on settings menu.")
+            destination_path = input(
+                "\nInsert a destination path for the downloaded media ")
         destination_path = CONFIGURATIONS['destination_path']
         main()
     except KeyboardInterrupt:

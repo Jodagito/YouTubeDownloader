@@ -2,31 +2,33 @@ import inspect
 import json
 import os
 from pytube import YouTube, Playlist
-from pytube.exceptions import RegexMatchError
+from pytube.exceptions import RegexMatchError, PytubeError
 
 
 CONFIGURATIONS = {'destination_path': '', 'video_quality': '',
                   'audio_quality': '', 'when_unavailable': ''}
 CONFIGS_FILE = 'configs.json'
-if not CONFIGURATIONS['destination_path']:
-    destination_path = input("\nInsert the destination path ")
-destination_path = CONFIGURATIONS['destination_path']
 
 
 def create_config_file():
     with open(CONFIGS_FILE, 'w') as config_file:
-        config_data = {'Destination path': '', 'Video quality': '',
-                       'Audio quality': '', 'When unavailable': 'Highest'}
+        config_data = {'destination_path': '', 'video_quality': '',
+                       'audio_quality': '', 'when_unavailable': 'Highest'}
         json.dump(config_data, config_file)
 
 
 def load_config_file():
     with open(CONFIGS_FILE) as config_file:
-        config_data = json.loads(config_file)
-        CONFIGURATIONS['destination_path'] = config_data['Destination path']
-        CONFIGURATIONS['video_quality'] = config_data['Video quality']
-        CONFIGURATIONS['audio_quality'] = config_data['Audio quality']
-        CONFIGURATIONS['when_unavailable'] = config_data['When unavailable']
+        config_data = json.load(config_file)
+        CONFIGURATIONS['destination_path'] = config_data['destination_path']
+        CONFIGURATIONS['video_quality'] = config_data['video_quality']
+        CONFIGURATIONS['audio_quality'] = config_data['audio_quality']
+        CONFIGURATIONS['when_unavailable'] = config_data['when_unavailable']
+
+
+if not os.path.exists(CONFIGS_FILE):
+    create_config_file()
+load_config_file()
 
 
 def main():
@@ -151,57 +153,72 @@ def settings_menu():
     clear_terminal()
     selected_option = input(
         f"\t\tConfiguration Menu\n\tSelect an option to continue" +
-        "\n\n\t1) Set default destination path" +
-        "\n\t2) Set default qualities\n").lower().replace(" ", "")
-    if selected_option in ["1", "setdefaultdestinationpath"]:
-        set_default_destination_path()
-    elif selected_option in ["2", "setdefaultqualities"]:
-        set_default_qualities()
+        "\n\n\t1) List actual settings" +
+        "\n\t2) Set destination path\n\t3) Set qualities\n\t4) Go back\n").lower().replace(" ", "")
+    if selected_option in ["1", "listactualsettings"]:
+        return list_settings()
+    elif selected_option in ["2", "setdestinationpath"]:
+        set_destination_path()
+    elif selected_option in ["3", "setqualities"]:
+        set_qualities()
+    elif selected_option in ["4", "goback"]:
+        return main()
     else:
-        handle_incorrect_selection()
+        return handle_invalid_input()
 
 
-def set_default_destination_path():
+def set_destination_path():
     clear_terminal()
     print("\n\n\t\tTo go back leave this in blank.")
     default_destination_path = input(
         "\n\nInsert the default destination path ")
     if (os.path.exists(default_destination_path) or
             os.access(os.path.dirname(default_destination_path), os.W_OK)):
-        with open(CONFIGS_FILE, 'w') as config_file:
-            json.dump(
-                {'Destination path': default_destination_path}, config_file)
+        with open(CONFIGS_FILE, 'r+') as config_file:
+            config_data = json.load(config_file)
+            config_data['destination_path'] = default_destination_path
+            config_file.seek(0)
+            config_file.write(json.dumps(config_data))
+            config_file.truncate()
     elif default_destination_path == "":
-        settings_menu()
+        return settings_menu()
     else:
-        handle_incorrect_selection()
+        return handle_invalid_input()
+    return settings_menu()
 
 
-def set_default_qualities():
+def set_qualities():
     clear_terminal()
     video_qualities = ["1080", "720", "480", "360", "144"]
     audio_qualities = ["160", "128", "70", "50"]
     print("\n\n\t\tTo go back leave both in blank.")
     default_video_quality = input(
-        "\n\Select the default video quality \n1) 1080px\n2) 720px\n3) 480px\n4) 360px\n5)144px\n")
+        "\n\tSelect the default video quality \n1) 1080px\n2) 720px\n3) 480px\n4) 360px\n5) 144px\n")
     default_audio_quality = input(
-        "\n\Select the default audio quality \n1) 160kbps\n2) 128kbps\n3) 70kbps\n4) 50kbps\n")
+        "\n\tSelect the default audio quality \n1) 160kbps\n2) 128kbps\n3) 70kbps\n4) 50kbps\n")
     if default_video_quality in ["1", "2", "3", "4", "5"]:
         default_video_quality = video_qualities[int(default_video_quality) - 1]
-        with open(CONFIGS_FILE, 'w') as config_file:
-            json.dump(
-                {'Video quality': default_video_quality}, config_file)
+        with open(CONFIGS_FILE, 'r+') as config_file:
+            config_data = json.load(config_file)
+            config_data['video_quality'] = default_video_quality
+            config_file.seek(0)
+            config_file.write(json.dumps(config_data))
+            config_file.truncate()
     if default_audio_quality in ["1", "2", "3", "4", "5"]:
         default_audio_quality = audio_qualities[int(
             default_audio_quality) - 1]
-        with open(CONFIGS_FILE, 'w') as config_file:
-            json.dump(
-                {'Audio quality': default_audio_quality}, config_file)
+        with open(CONFIGS_FILE, 'r+') as config_file:
+            config_data = json.load(config_file)
+            config_data['audio_quality'] = default_audio_quality
+            config_file.seek(0)
+            config_file.write(json.dumps(config_data))
+            config_file.truncate()
     elif default_video_quality == "" and default_audio_quality == "":
-        settings_menu()
+        return settings_menu()
     else:
-        handle_incorrect_selection()
+        return handle_invalid_input()
     set_default_when_unavailable()
+    return settings_menu()
 
 
 def set_default_when_unavailable():
@@ -212,13 +229,24 @@ def set_default_when_unavailable():
         f"\n\nSet lowest quality as default if" +
         " default one is unavailable\n\n\tYes\n\tNo\n").lower()
     if change_default in ["yes", "y"]:
-        with open(CONFIGS_FILE, 'w') as config_file:
-            json.dump(
-                {'When unavailable': "Lowest"}, config_file)
+        with open(CONFIGS_FILE, 'r+') as config_file:
+            config_data = json.load(config_file)
+            config_data['when_unavailable'] = 'Lowest'
+            config_file.seek(0)
+            config_file.write(json.dumps(config_data))
+            config_file.truncate()
     elif change_default in ["no", "n"]:
         return
     else:
         handle_incorrect_selection()
+def list_settings():
+    clear_terminal()
+    with open(CONFIGS_FILE, 'r+') as config_file:
+        config_data = json.load(config_file)
+        for setting, value in config_data.items():
+            print(f"{setting.capitalize().replace('_', ' ')} = {value}")
+    input("\n\nPress enter to continue...")
+    return settings_menu()
 
 
 def help_menu():
@@ -236,7 +264,10 @@ def clear_terminal():
 
 
 if __name__ == '__main__':
-    if not os.path.exists(CONFIGS_FILE):
-        create_config_file()
-    load_config_file()
-    main()
+    try:
+        if not CONFIGURATIONS['destination_path']:
+            destination_path = input("\nInsert the destination_path ")
+        destination_path = CONFIGURATIONS['destination_path']
+        main()
+    except KeyboardInterrupt:
+        exit()

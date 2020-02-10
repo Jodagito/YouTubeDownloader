@@ -33,27 +33,33 @@ load_config_file()
 
 def main():
     clear_terminal()
-    print("\t\tYouTube Downloader\n\n")
+    print("\tYouTube Downloader\n\n")
     menu_option = input(
         "Select and option to continue\n\n\t1) Start Downloading\n\t2) Settings\n\t3) Help\n\t4) Exit\n").lower()
     if menu_option in ['1', '1)', 'start downloading']:
-        downloads_menu()
+        return downloads_menu()
     elif menu_option in ['2', '2)', 'settings']:
-        settings_menu()
+        return settings_menu()
     elif menu_option in ['3', '3)', 'help']:
-        help_menu()
+        return help_menu()
     elif menu_option in ['4', '4)', 'exit']:
-        clear_terminal()
-        input("YouTube Downloader has been closed.")
+        return exit()
     else:
-        handle_incorrect_selection()
+        return handle_invalid_input()
 
 
 def downloads_menu():
     clear_terminal()
-    print("\t\tDownloads Menu\n\n")
-    download_source_url = input("Input the download source url ")
-    validate_youtube_url(download_source_url)
+    print("\tDownloads Menu\n\n")
+    download_source_url = ""
+    try:
+        download_source_url = input("Input the download source url ")
+        if not download_source_url:
+            return handle_invalid_input()
+    except KeyboardInterrupt:
+        return main()
+    if not validate_youtube_url(download_source_url):
+        return main()
     pytube_object = YouTube(download_source_url)
     playlist_videos = look_for_playlist(pytube_object)
     format_selection = input(
@@ -84,20 +90,21 @@ def validate_youtube_url(url):
         YouTube(url)
         return
     except RegexMatchError as e:
-        input("""Error: An invalid URL has been inserted.\n{e}\n
-              \nPress enter to continue...""")
-        main()
+        input(
+            f"Error: An invalid URL has been inserted.\n{e}\n\nPress enter to continue...")
+        return False
 
 
 def validate_playlist(url):
     try:
-        Playlist(download_source_url)
+        Playlist(url)
         return True
     except KeyError:
         return False
 
 
 def download_audio(pytube_object):
+    print(f"\nDownloading {pytube_object.title}")
     try:
         if not CONFIGURATIONS['audio_quality']:
             unavailable_audio(pytube_object)
@@ -110,8 +117,10 @@ def download_audio(pytube_object):
                     f"\n\nDefault quality isn't available. {CONFIGURATIONS['when_unavailable']} quality will be downloaded.")
                 return unavailable_audio(pytube_object)
             filtered_pytube_object.download(destination_path)
+            print(f"\n{pytube_object.title} downloaded succesfully.")
     except (IOError, OSError, PytubeError) as e:
         print(f"{pytube_object.title} couldn't be downloaded.\n{e}\n")
+        return
 
 
 def unavailable_audio(pytube_object):
@@ -121,9 +130,11 @@ def unavailable_audio(pytube_object):
     else:
         pytube_object.streams.filter(type='audio').order_by(
             'abr').all()[0].download(destination_path)
+    print(f"\n{pytube_object.title} downloaded succesfully.")
 
 
 def download_video(pytube_object):
+    print(f"\nDownloading {pytube_object.title}")
     try:
         if not CONFIGURATIONS['video_quality']:
             unavailable_video(pytube_object)
@@ -136,8 +147,10 @@ def download_video(pytube_object):
                     f"\n\nDefault quality isn't available. {CONFIGURATIONS['when_unavailable']} quality will be downloaded.")
                 return unavailable_video(pytube_object)
             filtered_pytube_object.download(destination_path)
+            print(f"\n{pytube_object.title} downloaded succesfully.")
     except (IOError, OSError, PytubeError) as e:
         print(f"{pytube_object.title} couldn't be downloaded.\n{e}\n")
+        return
 
 
 def unavailable_video(pytube_object):
@@ -147,6 +160,7 @@ def unavailable_video(pytube_object):
     else:
         pytube_object.streams.filter(type='audio').order_by(
             'abr').all()[0].download(destination_path)
+    print(f"\n{pytube_object.title} downloaded succesfully.")
 
 
 def settings_menu():

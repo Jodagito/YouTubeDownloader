@@ -90,7 +90,7 @@ def look_for_playlist(pytube_object):
 def validate_youtube_url(url):
     try:
         YouTube(url)
-        return
+        return True
     except RegexMatchError as e:
         input(
             f"Error: An invalid URL has been inserted.\n{e}\n\nPress enter to continue...")

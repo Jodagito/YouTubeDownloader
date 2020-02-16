@@ -117,9 +117,15 @@ def download_audio(pytube_object):
                 mime_type='audio/mp4').order_by('abr').desc().all()[0]
             if not filtered_pytube_object:
                 print(
-                    f"\n\nDefault quality isn't available. {CONFIGURATIONS['when_unavailable']} quality will be downloaded.")
+                    f"\n\nDefault quality isn't available." +
+                    " {CONFIGURATIONS['when_unavailable']}" +
+                    " quality will be downloaded.")
                 return unavailable_audio(pytube_object)
+            name_with_resolution = filtered_pytube_object.title + \
+                " " + filtered_pytube_object.abr + ".mp4"
             filtered_pytube_object.download(destination_path)
+            os.rename(destination_path + filtered_pytube_object.title +
+                      ".mp4", name_with_resolution)
             print(f"\n{pytube_object.title} downloaded succesfully.")
     except (IOError, OSError, PytubeError) as e:
         print(f"{pytube_object.title} couldn't be downloaded.\n{e}\n")
@@ -128,13 +134,21 @@ def download_audio(pytube_object):
 
 def unavailable_audio(pytube_object):
     if CONFIGURATIONS['when_unavailable'] == "Highest":
-        pytube_object.streams.filter(type='audio',
-                                     mime_type='audio/mp4').order_by(
-            'abr').desc().all()[0].download(destination_path)
+        pytube_object = pytube_object.streams.filter(type='audio',
+                                                     mime_type='audio/mp4').order_by(
+            'abr').desc().all()[0]
+        name_with_resolution = pytube_object.title + " " + pytube_object.abr + ".mp4"
+        pytube_object.download(destination_path)
+        os.rename(destination_path + pytube_object.title +
+                  ".mp4", name_with_resolution)
     else:
-        pytube_object.streams.filter(type='audio',
-                                     mime_type='audio/mp4').order_by(
-            'abr').all()[0].download(destination_path)
+        pytube_object = pytube_object.streams.filter(type='audio',
+                                                     mime_type='audio/mp4').order_by(
+            'abr').all()[0]
+        name_with_resolution = pytube_object.title + " " + pytube_object.abr + ".mp4"
+        pytube_object.download(destination_path)
+        os.rename(destination_path + pytube_object.title +
+                  ".mp4", name_with_resolution)
     print(f"\n{pytube_object.title} downloaded succesfully.")
 
 
@@ -155,7 +169,11 @@ def download_video(pytube_object):
                     " {CONFIGURATIONS['when_unavailable']} " +
                     "quality will be downloaded.")
                 return unavailable_video(pytube_object)
+            name_with_resolution = filtered_pytube_object.title + \
+                " " + filtered_pytube_object.resolution + ".mp4"
             filtered_pytube_object.download(destination_path)
+            os.rename(destination_path + filtered_pytube_object.title +
+                      ".mp4", name_with_resolution)
             print(f"\n{pytube_object.title} downloaded succesfully.")
     except (IOError, OSError, PytubeError) as e:
         print(f"{pytube_object.title} couldn't be downloaded.\n{e}\n")
@@ -164,15 +182,26 @@ def download_video(pytube_object):
 
 def unavailable_video(pytube_object):
     if CONFIGURATIONS['when_unavailable'] == "Highest":
-        pytube_object.streams.filter(type='video',
-                                     mime_type='video/mp4',
-                                     progressive='True').order_by(
-            'resolution').desc().all()[0].download(destination_path)
+        pytube_object = pytube_object.streams.filter(type='video',
+                                                     mime_type='video/mp4',
+                                                     progressive='True').order_by(
+            'resolution').desc().all()[0]
+        name_with_resolution = pytube_object.title + \
+            " " + pytube_object.resolution + ".mp4"
+        pytube_object.download(destination_path)
+        os.rename(destination_path + pytube_object.title +
+                  ".mp4", name_with_resolution)
     else:
-        pytube_object.streams.filter(type='video',
-                                     mime_type='video/mp4',
-                                     progressive='True').order_by(
-            'resolution').all()[0].download(destination_path)
+        pytube_object = pytube_object.streams.filter(type='video',
+                                                     mime_type='video/mp4',
+                                                     progressive='True'
+                                                     ).order_by(
+            'resolution').all()[0]
+        name_with_resolution = pytube_object.title + \
+            " " + pytube_object.resolution + ".mp4"
+        pytube_object.download(destination_path)
+        os.rename(destination_path + pytube_object.title +
+                  ".mp4", name_with_resolution)
     print(f"\n{pytube_object.title} downloaded succesfully.")
 
 

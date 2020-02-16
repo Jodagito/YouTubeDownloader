@@ -185,9 +185,10 @@ def settings_menu():
 
 def set_destination_path():
     clear_terminal()
-    print("\n\n\t\tTo go back leave this in blank.")
     default_destination_path = input(
         "\n\nInsert the default destination path ")
+    if not default_destination_path:
+        default_destination_path = "./"
     if (os.path.exists(default_destination_path) or
             os.access(os.path.dirname(default_destination_path), os.W_OK)):
         with open(CONFIGS_FILE, 'r+') as config_file:
@@ -196,8 +197,6 @@ def set_destination_path():
             config_file.seek(0)
             config_file.write(json.dumps(config_data))
             config_file.truncate()
-    elif default_destination_path == "":
-        return settings_menu()
     else:
         return handle_invalid_input()
     return settings_menu()
@@ -294,6 +293,8 @@ if __name__ == '__main__':
             print("A default path can be setted on settings menu.")
             destination_path = input(
                 "\nInsert a destination path for the downloaded media ")
+            if not destination_path:
+                destination_path = "./"
         destination_path = CONFIGURATIONS['destination_path']
         main()
     except KeyboardInterrupt:

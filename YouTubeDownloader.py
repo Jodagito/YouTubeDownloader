@@ -118,12 +118,16 @@ def download_audio(pytube_object):
             if not filtered_pytube_object:
                 when_unavailable = CONFIGURATIONS['when_unavailable']
                 print(
-                    f"\n\nDefault quality isn't available." +
-                    " {CONFIGURATIONS['when_unavailable']}" +
+                    f"\nDefault quality isn't available. {when_unavailable}" +
                     " quality will be downloaded.")
                 return unavailable_audio(pytube_object)
+            filtered_pytube_object = filtered_pytube_object[0]
             name_with_resolution = filtered_pytube_object.title + \
                 " " + filtered_pytube_object.abr + ".mp4"
+            if os.path.isfile(destination_path + name_with_resolution):
+                print(
+                    f"\nWarning: {name_with_resolution} already exists on this path.")
+                return
             filtered_pytube_object.download(destination_path)
             os.rename(destination_path + filtered_pytube_object.title +
                       ".mp4", name_with_resolution)
@@ -138,18 +142,18 @@ def unavailable_audio(pytube_object):
         pytube_object = pytube_object.streams.filter(type='audio',
                                                      mime_type='audio/mp4').order_by(
             'abr').desc().all()[0]
-        name_with_resolution = pytube_object.title + " " + pytube_object.abr + ".mp4"
-        pytube_object.download(destination_path)
-        os.rename(destination_path + pytube_object.title +
-                  ".mp4", name_with_resolution)
     else:
         pytube_object = pytube_object.streams.filter(type='audio',
                                                      mime_type='audio/mp4').order_by(
             'abr').all()[0]
-        name_with_resolution = pytube_object.title + " " + pytube_object.abr + ".mp4"
-        pytube_object.download(destination_path)
-        os.rename(destination_path + pytube_object.title +
-                  ".mp4", name_with_resolution)
+    name_with_resolution = pytube_object.title + " " + pytube_object.abr + ".mp4"
+    if os.path.isfile(destination_path + name_with_resolution):
+        print(
+            f"\nWarning: {name_with_resolution} already exists on this path.")
+        return
+    pytube_object.download(destination_path)
+    os.rename(destination_path + pytube_object.title +
+              ".mp4", name_with_resolution)
     print(f"\n{pytube_object.title} downloaded succesfully.")
 
 
@@ -167,12 +171,16 @@ def download_video(pytube_object):
             if not filtered_pytube_object:
                 when_unavailable = CONFIGURATIONS['when_unavailable']
                 print(
-                    f"\n\nDefault quality isn't available." +
-                    " {CONFIGURATIONS['when_unavailable']} " +
-                    "quality will be downloaded.")
+                    f"\nDefault quality isn't available. {when_unavailable}" +
+                    " quality will be downloaded.")
                 return unavailable_video(pytube_object)
+            filtered_pytube_object = filtered_pytube_object[0]
             name_with_resolution = filtered_pytube_object.title + \
                 " " + filtered_pytube_object.resolution + ".mp4"
+            if os.path.isfile(destination_path + name_with_resolution):
+                print(
+                    f"\nWarning: {name_with_resolution} already exists on this path.")
+                return
             filtered_pytube_object.download(destination_path)
             os.rename(destination_path + filtered_pytube_object.title +
                       ".mp4", name_with_resolution)
@@ -188,22 +196,21 @@ def unavailable_video(pytube_object):
                                                      mime_type='video/mp4',
                                                      progressive='True').order_by(
             'resolution').desc().all()[0]
-        name_with_resolution = pytube_object.title + \
-            " " + pytube_object.resolution + ".mp4"
-        pytube_object.download(destination_path)
-        os.rename(destination_path + pytube_object.title +
-                  ".mp4", name_with_resolution)
     else:
         pytube_object = pytube_object.streams.filter(type='video',
                                                      mime_type='video/mp4',
                                                      progressive='True'
                                                      ).order_by(
             'resolution').all()[0]
-        name_with_resolution = pytube_object.title + \
-            " " + pytube_object.resolution + ".mp4"
-        pytube_object.download(destination_path)
-        os.rename(destination_path + pytube_object.title +
-                  ".mp4", name_with_resolution)
+    name_with_resolution = pytube_object.title + \
+        " " + pytube_object.resolution + ".mp4"
+    if os.path.isfile(destination_path + name_with_resolution):
+        print(
+            f"\nWarning: {name_with_resolution} already exists on this path.")
+        return
+    pytube_object.download(destination_path)
+    os.rename(destination_path + pytube_object.title +
+              ".mp4", name_with_resolution)
     print(f"\n{pytube_object.title} downloaded succesfully.")
 
 

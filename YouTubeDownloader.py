@@ -114,8 +114,9 @@ def download_audio(pytube_object):
             default_quality = CONFIGURATIONS['audio_quality'] + 'kbps'
             filtered_pytube_object = pytube_object.streams.filter(
                 type='audio', abr=default_quality,
-                mime_type='audio/mp4').order_by('abr').desc().all()[0]
+                mime_type='audio/mp4').order_by('abr').desc().all()
             if not filtered_pytube_object:
+                when_unavailable = CONFIGURATIONS['when_unavailable']
                 print(
                     f"\n\nDefault quality isn't available." +
                     " {CONFIGURATIONS['when_unavailable']}" +
@@ -162,8 +163,9 @@ def download_video(pytube_object):
             filtered_pytube_object = pytube_object.streams.filter(
                 type='video', res=default_quality,
                 mime_type='video/mp4',
-                progressive='True').order_by('resolution').desc().all()[0]
+                progressive='True').order_by('resolution').desc().all()
             if not filtered_pytube_object:
+                when_unavailable = CONFIGURATIONS['when_unavailable']
                 print(
                     f"\n\nDefault quality isn't available." +
                     " {CONFIGURATIONS['when_unavailable']} " +

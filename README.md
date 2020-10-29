@@ -1,4 +1,4 @@
-# YouTube Downloader V1.1
+# YouTube Downloader V1.1.3
 
 ## Requirements
 
@@ -7,11 +7,7 @@
 
 ## Installation
 
-Open a terminal and execute `git clone https://github.com/Jodagito/YoutubeDownloader` on the destination folder.
-
-Once git finishes clonning the repo navigate to YouTubeDownloader folder.
-
-Inside the YouTubeDownloader folder execute `pip install . --user` to install the package and requirements globally on your system.
+`pip install YouTubeDownloader`
 
 ## Usage
 
@@ -32,3 +28,5 @@ Follow the CLI instructions.
 This tool has been developed merely as a learning challenge, isn't intended to have release dates.
 
 If you liked it please share it!
+
+Don't be shy, contribute.

@@ -11,13 +11,11 @@ Open a terminal and execute `git clone https://github.com/Jodagito/YoutubeDownlo
 
 Once git finishes clonning the repo navigate to YouTubeDownloader folder.
 
-Inside the YouTubeDownloader folder execute `pip install -r requirements.txt` to install the requirements.
-
-After requirements installation you can start downloading youtube media.
+Inside the YouTubeDownloader folder execute `pip install . --user` to install the package and requirements globally on your system.
 
 ## Usage
 
-Execute `python YouTubeDownloader.py`
+Execute `YouTubeDownloader`
 
 Follow the CLI instructions.
 

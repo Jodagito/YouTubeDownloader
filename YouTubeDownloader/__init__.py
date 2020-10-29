@@ -32,6 +32,20 @@ load_config_file()
 
 
 def main():
+    try:
+        if not CONFIGURATIONS['destination_path']:
+            print("A default path can be setted on settings menu.")
+            destination_path = input(
+                "\nInsert a destination path for the downloaded media ")
+            if not destination_path:
+                destination_path = "./"
+        destination_path = CONFIGURATIONS['destination_path']
+        start()
+    except KeyboardInterrupt:
+        exit()
+
+
+def start():
     clear_terminal()
     print("\tYouTube Downloader\n\n")
     menu_option = input(
@@ -57,9 +71,9 @@ def downloads_menu():
         if not download_source_url:
             return handle_invalid_input()
     except KeyboardInterrupt:
-        return main()
+        return start()
     if not validate_youtube_url(download_source_url):
-        return main()
+        return start()
     pytube_object = YouTube(download_source_url)
     playlist_videos = look_for_playlist(pytube_object)
     format_selection = input(
@@ -77,7 +91,7 @@ def downloads_menu():
     else:
         return handle_invalid_input()
     input("\nPress enter to continue...")
-    return main()
+    return start()
 
 
 def look_for_playlist(pytube_object):
@@ -226,7 +240,7 @@ def settings_menu():
     elif selected_option in ["3", "setqualities"]:
         set_qualities()
     elif selected_option in ["4", "goback"]:
-        return main()
+        return start()
     else:
         return handle_invalid_input()
 
@@ -267,7 +281,7 @@ def set_qualities():
             config_file.seek(0)
             config_file.write(json.dumps(config_data))
             config_file.truncate()
-    if default_audio_quality in ["1", "2", "3", "4", "5"]:
+    if default_audio_quality in ["1", "2", "3", "4"]:
         default_audio_quality = audio_qualities[int(
             default_audio_quality) - 1]
         with open(CONFIGS_FILE, 'r+') as config_file:
@@ -317,7 +331,7 @@ def list_settings():
 def help_menu():
     clear_terminal()
     input("Sorry, this menu is being developed\nPress enter to continue...")
-    return main()
+    return start()
 
 
 def exit():
@@ -336,14 +350,4 @@ def clear_terminal():
 
 
 if __name__ == '__main__':
-    try:
-        if not CONFIGURATIONS['destination_path']:
-            print("A default path can be setted on settings menu.")
-            destination_path = input(
-                "\nInsert a destination path for the downloaded media ")
-            if not destination_path:
-                destination_path = "./"
-        destination_path = CONFIGURATIONS['destination_path']
-        main()
-    except KeyboardInterrupt:
-        exit()
+    main()
